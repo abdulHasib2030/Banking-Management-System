@@ -1,201 +1,180 @@
 class User:
-  def __init__(self, name, password, amount,history):
-    self.history = history
+  def __init__(self, name, password):
     self.name = name
     self.password = password
-    self.amount = amount
-  
+    self.amount = 0
+    self.id = None
+    self.history = []
 
-
-class Admin:
-  def __init__(self,name, password):
-    self.name = name
+class Admin_account:
+  def __init__(self, email, password):
+    self.email = email
     self.password = password
-    
+    self.id = None
 
 
 class AB_Bank:
   def __init__(self, name):
-    self.total_customer = []
-    self.admin = []
+    self.total_customer = {}
+    self.admin = {}
     self.name = name
     self.total_bank_amount = 0
     self.total_loan_amount = 0
     self.loan_feauture = False
   
-  # Account Create Customer 
-  def customer_account(self):
-    email = input("Enter Your email: ")
-    password = input("Enter Your Password: ")
-    amount = 0
-    history = []
-    print(f"\n{('*'*50)}\n{(' '*10)} Account Successfully Created... \n{('*'*50)}")
+  def user_create_account(self, user_email, user_password):
+    user = User(user_email, user_password)
+    serial_id = f'{self.name}-{len(self.total_customer) + 1}'
+    user.id = serial_id
+    self.total_customer[serial_id] = user
 
-    self.customer = User(email, password, amount, history)
-    self.total_customer.append(vars(self.customer))
+  def admin_create_account(self, email, password):
+    admin = Admin_account(email, password)
+    serial_id = f'{self.name}_admin-{len(self.admin) + 1}'
+    self.admin[serial_id] = admin
 
 
- # Customer Deposit Amount 
-  def deposit(self, amount):
-    email = input("Enter your Eamil: ")
-    password = input("Enter your password: ")
-    for i in self.total_customer:
-      if i['name'] == email and i['password'] == password:
-        i['amount'] = i['amount'] + amount
-        his = f'You are deposit amount: {amount}'
-        i['history'].append(his)
-        print(f"{('*'*50)}\n {(' '*10)}Successfully deposit your amount..\n{('*'*50)}")
-        self.total_bank_amount += amount
 
-  # Customer Withdraw Amount 
-  def withdraw(self, amount):
-    email = input("Enter your Eamil: ")
-    password = input("Enter your password: ")
-    
-    for i in self.total_customer:
-      if i['name'] == email and i['password'] == password:
-        if self.total_bank_amount == 0:
-          print(f"{('*'*50)}\n {(' '*10)}BRANK is Fokira.\n{('*'*50)}")
-        elif i['amount'] >= amount:
-          print(f"{('*'*50)}\n {(' '*10)}Your are successfully done withdraw amount...\n{('*'*50)}")
-          his = f'You are withdraw amount: {amount}'
-          i['history'].append(his)
-          self.total_bank_amount -= amount
-          i['amount'] = i['amount'] - amount
-        else:
-          print(f"{('*'*50)}\n {(' '*10)}Your account not enough money...\n{('*'*50)}")
+
+class user_account:
+  def __init__(self, bank):
+    self.bank = bank
   
-  # Customer Bank Balance Check
-  def available_balance(self):
-    email = input("Enter your Eamil: ")
-    password = input("Enter your password: ")
-    for i in self.total_customer:
-      if i['name'] == email and i['password'] == password:
-        print(f'{("*"*50)}\n {(" "*10)}Total available Balance: {i["amount"]}\n{("*"*50)}')
+  def deposit(self, user_id, amount):
+    if user_id in bank.total_customer.keys():
+      bank.total_customer[user_id].amount += amount
+      bank.total_bank_amount += amount
+      his = f'{(" "*10)}Deposit amount: {amount}'
+      bank.total_customer[user_id].history.append(his)
+      print("-------------SuccessFully Done Deposit-----------\n")
   
-  # Customer Can Transfer money another Account
-  def Transfer_amount(self):
-    name = input("Enter Transfer Account Email: ")
-    for i in self.total_customer:
-      if i['name'] == name: 
-        email = input("Enter your email: ")
-        password = input("Enter your Password: ")
-        amount = int(input("Enter Transfer Amount: "))
-        for j in self.total_customer:
-          if j['name'] == email and j['password'] == password:
-            print("some thing")
-            if amount <= j['amount']:
-              j['amount'] = j['amount'] - amount
-              his1 = f'Transfer money with Account email {i["name"]} tk {amount}.'
-              j['history'].append(his1)
-              i['amount'] = i['amount'] + amount
-              his2 = f'Received money with account email {j["name"]} tk {amount}'
-              i['history'].append(his2)
-              print(f"{('*'*50)}\n {(' '*10)} Successfully transfer money..\n{('*'*50)}")
-            else:
-              print(f"{('*'*50)}\n {(' '*10)}Not enough money your accout..\n{('*'*50)}")
-         
-  # Customer Transaction History
-  def History(self):
-    email = input("Enter your Email: ")
-    password = input("Enter your password: ")
-    print(f"{('*'*50)}")
-    for i in self.total_customer:
-      if i['name'] == email and i['password'] == password:
-        for k in i['history']:
-          print(f"{(' '*10)}", k)
-    print(f"{('*'*50)}")  
+  def withdraw(self, user_id, amount):
+    if user_id in bank.total_customer.keys():
+      if bank.total_bank_amount < amount and amount <= bank.total_customer[user_id].amount:
+        print("-----------Bank is bankrupt----------\n")
+      elif amount > bank.total_customer[user_id].amount:
+        print(f'--------Your account not enough money. You can withdraw {bank.total_customer[user_id].amount}tk--------\n')
+      elif amount <= bank.total_customer[user_id].amount:
+        bank.total_customer[user_id].amount -= amount
+        bank.total_bank_amount -= amount
+        his = f'{(" "*10)}Withdraw amount: {amount}'
+        bank.total_customer[user_id].history.append(his)
+        print("-----------SuccessFully Done Withdraw---------\n")
 
-  # Customer can withdraw a loan
-  def user_loan(self):
-    if self.loan_feauture == False:
-      print(f"{('*'*50)}\n {(' '*10)} Loan Feature is OFF\n{('*'*50)}")
-      return
+  def check_available_balance(self, user_id):
+    if user_id in bank.total_customer.keys():
+      print(f'-----------Your bank account total available Balance: {bank.total_customer[user_id].amount}-----------\n')
+  
+  def transfer_money_another_account(self, transfer_account_id, transfer_money, user_id):
+    if user_id in bank.total_customer.keys():
+      if bank.total_customer[user_id].amount < transfer_money:
+        print(f'-----------My account not enough money. I tranfer money {bank.total_customer[user_id].amount}----------\n')
+      
+      elif bank.total_customer[user_id].amount >= transfer_money:
+        if transfer_account_id in bank.total_customer.keys():
+          bank.total_customer[transfer_account_id].amount += transfer_money
+          bank.total_customer[user_id].amount -=transfer_money
+          his = f'{(" "*10)}Transfer amount: {transfer_money}'
+          bank.total_customer[user_id].history.append(his)
+          his_1 = f'{(" "*10)}Recived money with {bank.total_customer[user_id].name} amount: {transfer_money}'
+          bank.total_customer[transfer_account_id].history.append(his_1)
+          print("-------------Successfully done Transfer amount-----------\n")
+
+  def check_history(self, user_id):
+    if user_id in bank.total_customer.keys():
+      print(f"-----------{bank.total_customer[user_id].name} History-------------\n")
+      for i in bank.total_customer[user_id].history:
+        print(i)
+      print()
+
+  def loan_user(self, user_id, amount):
+    if bank.loan_feauture == False:
+      print("-------------Loan feauture OFF-------------\n")
     else:
-      email = input("Enter your Email: ")
-      password = input("Enter your password: ")
-      for i in self.total_customer:
-        if i['name'] == email and i['password'] == password:
-          print(f'{("*"*50)}\n {(" "*10)}You can loan withdraw amount {i["amount"]*2}\n{("*"*50)}')
-          amount = int(input("Enter your loan amount: "))
-          if amount < self.total_bank_amount and amount <= i['amount']:
-            self.total_bank_amount -= amount
-            self.total_loan_amount += amount
-            his = f"Loan amount {amount}"
-            i['history'].append(his)
-            print(f"{('*'*50)}\n {(' '*10)}you successfully done loan withdraw.. {amount} \n{('*'*50)}")
-          elif amount> self.total_bank_amount:
-            print(f"{('*'*50)}\n {(' '*10)} Bank fokira hoiha jabe..\n{('*'*50)}")
-          elif amount >= i['amount']:
-            print(f"{('*'*50)}\n {(' '*10)}You cannot withdraw loan This amount {amount}\n{('*'*50)}")
+      total_loan_cus = bank.total_customer[user_id].amount*2
+      if amount > bank.total_bank_amount:
+        print("---------Bank fokira. Not Enough money you want---------\n")
+      else:
+        print(f'----------You can withdraw loan {total_loan_cus}--------\n')
+        his = f'{(" "*10)}Loan amount: {amount}'
+        bank.total_loan_amount += amount
+        bank.total_bank_amount -= amount
+        bank.total_customer[user_id].history.append(his)
+        print("-----------SuccessFully Done loan-----------\n")
+      
+class Admin:
+  def __init__(self, bank):
+    self.bank = bank
 
-  # Admin create account
-  def admin_account(self):
-    email = input("Enter your email: ")
-    password = input("Enter your password: ")
-    print(f"{('*'*50)}\n {(' '*10)} Successfully admin account create.\n{('*'*50)}")
-    self.admin_add = Admin(email, password)
-    self.admin.append(vars(self.admin_add))
-
-  # Admin Check Total Bank Balance
-  def bank_balance(self):
-    email = input("Enter admin Email: ")
-    password = input("Enter admin password: ")
-    for i in self.admin:
-      if i['name'] == email and i['password'] == password:
-        print(f"{('*'*50)}\n {(' '*10)} Total Available Bank Balance: {self.total_bank_amount} \n{('*'*50)}")
+  def check_total_bank_balance(self, admin_id):
+    if admin_id in bank.admin.keys():
+      print(f'-------------Total available Bank Balance: {bank.total_bank_amount}-----------\n')
   
-  # Admin check Total loan Balance
-  def loan_bank(self):
-    email = input("Enter admin Email: ")
-    password = input("Enter admin password: ")
-    for i in self.admin:
-      if i['name'] == email and i['password'] == password:
-        print(f"{('*'*50)}\n {(' '*10)}Total loan Bank Balance: {self.total_loan_amount}\n{('*'*50)}")
-
-  # Loan Feauture On or off
-  def loan_feauture_off_or_on(self):
-    if self.total_bank_amount == 0:
-      self.loan_feauture = False
-      print(f"{('*'*50)}\n {(' '*10)}OFF loan feauture...\n{('*'*50)}")
-    else:
-      self.loan_feauture = True
-      print(f"{('*'*50)}\n {(' '*10)}ON loan feauture...\n{('*'*50)}")
+  def check_total_loan_amount(self, admin_id):
+    if admin_id in bank.admin.keys():
+      print(f'----------Total loan amount: {bank.total_loan_amount}---------\n')
+  
+  def on_off_loan_feauture(self, admin_id):
+    if admin_id in bank.admin.keys():
+      if bank.total_bank_amount > 1:
+        bank.loan_feauture = True
+        print("---------Loan Feauture ON---------\n")
+      else:
+        bank.loan_feauture = False
+        print("--------Loan Feauture OFF-------\n")
 
 
 
 bank = AB_Bank('AB')
-while True:
-  print("----------------BANK USER HOLDER INFORMATION-----------")
-  print("1. Enter one  for creater customer account: \n2. Enter two deposit and withdraw amount \n3. Enter Three check Avalable Balance \n4. Enter four transfer money another Account \n5. Enter five Check Transaction History. \n6. Enter six withdraw loan..")
-  print("----------------BANK ADMIN INFORMATION--------------")
-  print("7. Enter seven create admin account \n8. Enter eight total avilable bank balance \n9. Enter nine total loan amount \n10. Enter ten off or on loan feauture.. \n11 Enter ten EXIT..")
+#1. Create account User:
+bank.user_create_account('abdul', 123)
+bank.user_create_account('kaosar', 523)
 
-  num = int(input(f"{('*'*50)}\nEnter a Number: "))
-  if num == 11: 
-    break
-  if num == 1:
-    bank.customer_account()
-  elif num == 2:
-    print(f"{('*'*50)}\n1. Enter one deposit money \n2. Enter two withdraw money \n{('*'*50)}")
-    b = int(input("Enter a number: "))       
-    if b == 1:
-      bank.deposit(int(input("Enter deposit amount: ")))
-    elif b == 2:
-      bank.withdraw(int(input("Enter Withdraw amount: ")))
-  elif num == 3:
-    bank.available_balance()
-  elif num == 4:
-    bank.Transfer_amount()
-  elif num == 5:
-    bank.History()
-  elif num == 6:
-    bank.user_loan()
-  elif num == 7:
-    bank.admin_account()
-  elif num == 8:
-    bank.bank_balance()
-  elif num == 9:
-    bank.loan_bank()
-  elif num == 10:
-    bank.loan_feauture_off_or_on()
+#2. Deposit And withdrawal Amount User:
+user = user_account(bank)
+# print Deposit 
+user.deposit('AB-1', 3000)
+user.deposit('AB-1', 5000)
+user.deposit('AB-2', 20000)
+# print Withdraw
+user.withdraw('AB-1', 2000)
+user.withdraw('AB-2', 50000)
+
+#3. Check Available Balance:
+user.check_available_balance('AB-1')
+user.check_available_balance('AB-2')
+
+#4. Transfer money another account:
+user.transfer_money_another_account('AB-2', 8000, 'AB-1')
+user.transfer_money_another_account('AB-1', 5000, 'AB-2')
+
+#5. Check Transaction History:
+user.check_history('AB-1')
+
+user.check_history('AB-2')
+
+#6. Loan Amount:
+user.loan_user('AB-1', 1000)
+user.loan_user('AB-2', 1000)
+
+## Admin
+# 1. Create admin Account:
+bank.admin_create_account('ad@gmail.com', 12)
+
+#2. Check Total Balance of the Bank:
+admin = Admin(bank)
+admin.check_total_bank_balance('AB_admin-1')
+
+#3. Check Total Loan Amount:
+admin.check_total_loan_amount('AB_admin-1')
+
+#4. Loan feature on or off:
+admin.on_off_loan_feauture('AB_admin-1')
+
+###### Check Bank is bankrupt
+user.loan_user('AB-2', 26000)
+admin.check_total_bank_balance('AB_admin-1')
+user.withdraw('AB-1', 1000)
+
+
+
